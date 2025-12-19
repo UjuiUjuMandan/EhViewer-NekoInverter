@@ -1,0 +1,132 @@
+diff --git a/app/src/main/java/com/hippo/ehviewer/EhApplication.kt b/app/src/main/java/com/hippo/ehviewer/EhApplication.kt
+index 710d68a5..4deb7169 100644
+--- a/app/src/main/java/com/hippo/ehviewer/EhApplication.kt
++++ b/app/src/main/java/com/hippo/ehviewer/EhApplication.kt
+@@ -36,7 +36,9 @@ import coil3.request.crossfade
+ import coil3.serviceLoaderEnabled
+ import coil3.util.DebugLogger
+ import com.hippo.ehviewer.client.EhCookieStore
++import com.hippo.ehviewer.client.EhDns
+ import com.hippo.ehviewer.client.EhEngine
++import com.hippo.ehviewer.client.EhSSLSocketFactory
+ import com.hippo.ehviewer.client.EhTagDatabase
+ import com.hippo.ehviewer.client.data.GalleryDetail
+ import com.hippo.ehviewer.coil.DownloadThumbInterceptor
+@@ -251,8 +253,9 @@ class EhApplication :
+                 .build()
+             OkHttpClient.Builder().apply {
+                 cookieJar(EhCookieStore)
++                dns(EhDns)
+                 proxySelector(ehProxySelector)
+-                sslSocketFactory(certs.sslSocketFactory(), certs.trustManager)
++                sslSocketFactory(EhSSLSocketFactory(certs.sslSocketFactory()), certs.trustManager)
+                 addInterceptor(CloudflareInterceptor(application))
+             }.build()
+         }
+diff --git a/app/src/main/java/com/hippo/ehviewer/Settings.kt b/app/src/main/java/com/hippo/ehviewer/Settings.kt
+index 439884ad..a76f32d1 100644
+--- a/app/src/main/java/com/hippo/ehviewer/Settings.kt
++++ b/app/src/main/java/com/hippo/ehviewer/Settings.kt
+@@ -170,7 +170,7 @@ object Settings {
+     const val KEY_APP_LANGUAGE = "app_language"
+     private const val DEFAULT_APP_LANGUAGE = "system"
+     private const val KEY_PROXY_TYPE = "proxy_type"
+-    private const val DEFAULT_PROXY_TYPE = EhProxySelector.TYPE_SYSTEM
++    private const val DEFAULT_PROXY_TYPE = EhProxySelector.TYPE_DIRECT
+     private const val KEY_PROXY_IP = "proxy_ip"
+     private val DEFAULT_PROXY_IP: String? = null
+     private const val KEY_PROXY_PORT = "proxy_port"
+diff --git a/app/src/main/java/com/hippo/ehviewer/client/EhDns.kt b/app/src/main/java/com/hippo/ehviewer/client/EhDns.kt
+new file mode 100644
+index 00000000..1b6980d8
+--- /dev/null
++++ b/app/src/main/java/com/hippo/ehviewer/client/EhDns.kt
+@@ -0,0 +1,43 @@
++package com.hippo.ehviewer.client
++
++import java.net.InetAddress
++import java.net.UnknownHostException
++import okhttp3.Dns
++
++object EhDns : Dns {
++    const val CFSUFFIX = ".cdn.cloudflare.net"
++
++    // origin server IP, not cloudflare IP
++    private val sexIP = mutableListOf(
++        InetAddress.getByName("178.175.128.253"),
++        InetAddress.getByName("178.175.128.254"),
++        InetAddress.getByName("178.175.129.253"),
++        InetAddress.getByName("178.175.129.254"),
++        InetAddress.getByName("178.175.132.21"),
++        InetAddress.getByName("178.175.132.22"),
++    )
++    private val exIP = mutableListOf(
++        InetAddress.getByName("178.175.128.251"),
++        InetAddress.getByName("178.175.128.252"),
++        InetAddress.getByName("178.175.129.251"),
++        InetAddress.getByName("178.175.129.252"),
++        InetAddress.getByName("178.175.132.19"),
++        InetAddress.getByName("178.175.132.20"),
++    ).apply { addAll(sexIP) }
++
++    @Throws(UnknownHostException::class)
++    override fun lookup(hostname: String): List<InetAddress> {
++        if (hostname == "exhentai.org") {
++            exIP.shuffle()
++            return exIP
++        }
++        if (hostname.endsWith(".exhentai.org")) {
++            sexIP.shuffle()
++            return sexIP
++        }
++        if (hostname.endsWith("e-hentai.org")) {
++            return Dns.SYSTEM.lookup("$hostname$CFSUFFIX")
++        }
++        return Dns.SYSTEM.lookup(hostname)
++    }
++}
+diff --git a/app/src/main/java/com/hippo/ehviewer/client/EhSSLSocketFactory.kt b/app/src/main/java/com/hippo/ehviewer/client/EhSSLSocketFactory.kt
+new file mode 100644
+index 00000000..1c0a6a88
+--- /dev/null
++++ b/app/src/main/java/com/hippo/ehviewer/client/EhSSLSocketFactory.kt
+@@ -0,0 +1,39 @@
++package com.hippo.ehviewer.client
++
++import com.hippo.ehviewer.EhApplication
++import java.net.InetAddress
++import java.net.Proxy
++import java.net.Socket
++import java.net.URI
++import javax.net.ssl.SSLSocketFactory
++
++class EhSSLSocketFactory(val factory: SSLSocketFactory) : SSLSocketFactory() {
++
++    override fun createSocket(s: Socket, host: String, port: Int, autoClose: Boolean): Socket {
++        val noProxy = EhApplication.ehProxySelector.select(URI("https://$host"))[0] == Proxy.NO_PROXY
++        val newHost = if (noProxy) s.inetAddress.hostAddress else host
++        return factory.createSocket(s, newHost, port, autoClose)
++    }
++
++    override fun createSocket(host: String?, port: Int): Socket = factory.createSocket(host, port)
++
++    override fun createSocket(
++        host: String?,
++        port: Int,
++        localHost: InetAddress?,
++        localPort: Int,
++    ): Socket = factory.createSocket(host, port, localHost, localPort)
++
++    override fun createSocket(host: InetAddress?, port: Int): Socket = factory.createSocket(host, port)
++
++    override fun createSocket(
++        address: InetAddress?,
++        port: Int,
++        localAddress: InetAddress?,
++        localPort: Int,
++    ): Socket = factory.createSocket(address, port, localAddress, localPort)
++
++    override fun getDefaultCipherSuites(): Array<String> = factory.defaultCipherSuites
++
++    override fun getSupportedCipherSuites(): Array<String> = factory.supportedCipherSuites
++}

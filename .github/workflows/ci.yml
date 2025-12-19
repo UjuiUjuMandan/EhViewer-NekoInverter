@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [ 'master' ]
+
+jobs:
+  linux:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: '0'
+
+      - name: Apply patches
+        run : |
+          pushd EhViewer
+          bash ../patches/apply.sh
+          mv * ../
+          mv .editorconfig ../
+          popd
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Spotless Check
+        run: ./gradlew spotlessCheck
+
+      - name: Gradle Build
+        run: ./gradlew assembleRelease
+
+      - name: Upload app
+        uses: actions/upload-artifact@v4
+        with:
+          name: EhViewer-${{ github.sha }}
+          path: app/build/outputs
+
+      - name: Set ci tag
+        run: git tag -f ci; git push -f --tags
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "app/build/outputs/apk/release/app-universal-release.apk"
+          name: "CI Build"
+          omitBody: true
+          omitBodyDuringUpdate: true
+          tag: ci

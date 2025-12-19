@@ -1,0 +1,21 @@
+diff --git a/app/src/main/res/xml/about_settings.xml b/app/src/main/res/xml/about_settings.xml
+index bf80de39..b8a6e8c8 100644
+--- a/app/src/main/res/xml/about_settings.xml
++++ b/app/src/main/res/xml/about_settings.xml
+@@ -47,14 +47,14 @@
+         android:title="@string/settings_about_latest_release"
+         app:enableCopying="true"
+         app:iconSpaceReserved="false"
+-        app:url="https://github.com/EhViewer-NekoInverter/EhViewer/releases" />
++        app:url="https://github.com/UjuiUjuMandan/EhViewer-NekoInverter/releases" />
+ 
+     <com.hippo.preference.UrlPreference
+         android:key="source"
+         android:title="@string/settings_about_source"
+         app:enableCopying="true"
+         app:iconSpaceReserved="false"
+-        app:url="https://github.com/EhViewer-NekoInverter/EhViewer" />
++        app:url="https://github.com/UjuiUjuMandan/EhViewer-NekoInverter" />
+ 
+     <com.hippo.ehviewer.preference.VersionPreference
+         android:key="version"
