@@ -124,7 +124,7 @@ index 00000000..e4a97573
 +
 +private const val OUTER_SNI = "cloudflare-ech.com"
 +private const val DEFAULT_TTL = 300L
-+private val RESOLVER = SimpleResolver("1dot1dot1dot1.cloudflare-dns.com")
++private val RESOLVER = SimpleResolver("common.dot.dns.yandex.net")
 +private var ttl: Long? = null
 +private var expirationTime: Long = 0
 +var cachedEchConfig: ByteArray? = null
