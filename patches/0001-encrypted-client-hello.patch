@@ -122,11 +122,11 @@ index 00000000..e4a97573
 +import org.xbill.DNS.SimpleResolver
 +import org.xbill.DNS.Type
 +
-+private const val OUTER_SNI = "cloudflare-ech.com"
 +private const val DEFAULT_TTL = 300L
 +private val RESOLVER = SimpleResolver("common.dot.dns.yandex.net")
 +private var ttl: Long? = null
 +private var expirationTime: Long = 0
++const val OUTER_SNI = "cloudflare-ech.com"
 +var cachedEchConfig: ByteArray? = null
 +
 +fun loadCachedEchConfig(): ByteArray? = cachedEchConfig?.takeIf { System.currentTimeMillis() < expirationTime }?.also {
@@ -175,21 +175,18 @@ new file mode 100644
 index 00000000..66e2d708
 --- /dev/null
 +++ b/app/src/main/java/com/hippo/ehviewer/client/EhDns.kt
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,15 @@
 +package com.hippo.ehviewer.client
 +
 +import java.net.InetAddress
 +import okhttp3.Dns
 +
 +object EhDns : Dns {
-+    const val CFSUFFIX = ".cdn.cloudflare.net"
-+
 +    override fun lookup(hostname: String): List<InetAddress> {
-+        if (hostname.endsWith("e-hentai.org")) {
-+            return Dns.SYSTEM.lookup("e-hentai.org$CFSUFFIX")
-+        }
-+        if (hostname.endsWith("exhentai.org")) {
-+            return Dns.SYSTEM.lookup("exhentai.org$CFSUFFIX")
++        if (hostname.endsWith("e-hentai.org") or
++            hostname.endsWith("exhentai.org")
++        ) {
++            return Dns.SYSTEM.lookup(OUTER_SNI)
 +        }
 +        return Dns.SYSTEM.lookup(hostname)
 +    }
