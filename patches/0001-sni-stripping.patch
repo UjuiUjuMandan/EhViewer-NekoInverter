@@ -41,7 +41,7 @@ new file mode 100644
 index 00000000..1b6980d8
 --- /dev/null
 +++ b/app/src/main/java/com/hippo/ehviewer/client/EhDns.kt
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,49 @@
 +package com.hippo.ehviewer.client
 +
 +import java.net.InetAddress
@@ -52,6 +52,9 @@ index 00000000..1b6980d8
 +    const val CFSUFFIX = ".cdn.cloudflare.net"
 +
 +    // origin server IP, not cloudflare IP
++    private val forumsIP = mutableListOf(
++        InetAddress.getByName("94.100.18.243"),
++    )
 +    private val sexIP = mutableListOf(
 +        InetAddress.getByName("178.175.128.253"),
 +        InetAddress.getByName("178.175.128.254"),
@@ -78,6 +81,9 @@ index 00000000..1b6980d8
 +        if (hostname.endsWith(".exhentai.org")) {
 +            sexIP.shuffle()
 +            return sexIP
++        }
++        if (hostname == "forums.e-hentai.org") {
++            return forumsIP
 +        }
 +        if (hostname.endsWith("e-hentai.org")) {
 +            return Dns.SYSTEM.lookup("$hostname$CFSUFFIX")
