@@ -1,0 +1,5 @@
+An E-Hentai Application for Android.
+
+This is a fork of EhViewer-NekoInverter with Internet censorship circumvention.
+
+All current EhViewer forks: <https://zh.wikibooks.org/wiki/EhViewer/分支>

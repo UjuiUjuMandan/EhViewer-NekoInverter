@@ -1,0 +1,5 @@
+E-Hentai Android 客户端。
+
+这是 EhViewer-NekoInverter 的分叉，带审查规避（直连）功能。
+
+EhViewer 分叉一览: <https://zh.wikibooks.org/wiki/EhViewer/分支>
