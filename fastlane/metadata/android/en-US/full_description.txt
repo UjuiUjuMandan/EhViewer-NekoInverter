@@ -1,3 +1,9 @@
 <p>An E-Hentai Application for Android.</p>
-<p>This is a fork of EhViewer-NekoInverter with Internet censorship circumvention.</p>
+<p>This fork of EhViewer-NekoInverter changes:</p>
+<ul>
+<li>For direct connections, strips the original SNI host. It uses hard-coded origin IPs for exhentai.org and its subdomains, and resolves e-hentai.org hosts through corresponding *.cdn.cloudflare.net names.</li>
+<li>Defaults to the Non-H category for guests and filters popular and toplist results to Non-H for guests. Signed-in users are not subject to this filter.</li>
+<li>Defaults to DIRECT connections rather than the system proxy. If you rely on a system proxy, select it in the app's proxy settings.</li>
+</ul>
+<p>TLS certificate verification is not disabled: the socket factory changes only the SNI host for direct connections; OkHttp's trust manager and hostname verifier remain unchanged.</p>
 <p>All current EhViewer forks: <a href="https://zh.wikibooks.org/wiki/EhViewer/%E5%88%86%E6%94%AF">https://zh.wikibooks.org/wiki/EhViewer/分支</a></p>

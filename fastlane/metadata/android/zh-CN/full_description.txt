@@ -1,3 +1,9 @@
 <p>E-Hentai Android 客户端。</p>
-<p>这是 EhViewer-NekoInverter 的分叉，带审查规避（直连）功能。</p>
+<p>相较于 EhViewer-NekoInverter，本分叉有以下改动：</p>
+<ul>
+<li>直连时替换原始 SNI 主机名：exhentai.org 及其子域名使用内置源站 IP，e-hentai.org 域名通过对应的 *.cdn.cloudflare.net 域名解析。</li>
+<li>游客模式默认选择 Non-H 分类，并将热门和排行榜结果筛选为 Non-H；已登录用户不受此筛选影响。</li>
+<li>默认代理从系统代理改为 DIRECT（直连）。依赖系统代理的用户需在应用代理设置中手动选择系统代理。</li>
+</ul>
+<p>TLS 证书校验未关闭：直连时套接字工厂仅替换 SNI 主机名，OkHttp 的信任管理器和主机名校验器保持不变。</p>
 <p>EhViewer 分叉一览: <a href="https://zh.wikibooks.org/wiki/EhViewer/%E5%88%86%E6%94%AF">https://zh.wikibooks.org/wiki/EhViewer/分 支</a></p>
