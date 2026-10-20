@@ -1,1 +1,1 @@
-An E-Hentai Application for Android with censorship circumvention
+A gallery viewer with DPI circumvention
